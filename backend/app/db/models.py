@@ -1,5 +1,5 @@
 from .database import Base
-from sqlalchemy import Integer, Column, String, DECIMAL, Date, DateTime, Boolean, ForeignKey, UniqueConstraint
+from sqlalchemy import Integer, Column, String, DECIMAL, Date, DateTime, Boolean, ForeignKey, UniqueConstraint, Enum, Time
 from sqlalchemy.sql import func
 
 class Client(Base):
@@ -19,3 +19,12 @@ class Employee(Base):
     base_salary = Column(DECIMAL, nullable=False)
     designation = Column(String, index=True, nullable=False)
     join_date = Column(Date, nullable=False) # nullable=False in every field because it is by default True, so this can lead to a problem of database accepting an employee row with no name or base salary etc, so nullable=False, or it simply means this field cannot be empty
+
+class Attendance(Base):
+    __tablename__ = "attendance"
+    id = Column(Integer, primary_key=True, nullable=False)
+    employee_id = Column(Integer, ForeignKey("employees.id"), nullable=False)
+    date = Column(Date, nullable=False)
+    check_in_time = Column(Time, nullable=True) # Here nullable is true because leave/absent days won't have a check_in_time
+    __table_args__ = (UniqueConstraint("employee_id", "date", name="uq_employee_date"),)
+    status = Column(Enum("Present", "On-Leave", "Absent", "Half-Day", name = "Status_enum"), nullable=False)
